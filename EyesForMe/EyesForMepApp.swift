@@ -11,7 +11,7 @@ import SwiftUI
 struct EyesForMeApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TelaPrincipal()
         }
     }
 }
