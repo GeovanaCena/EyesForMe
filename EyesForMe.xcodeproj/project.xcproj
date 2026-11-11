@@ -11,20 +11,20 @@
     ],
   },
   "files": [
-    { "kind": "folder", "path": "GreatApp", "target-membership": [ "GreatApp" ] },
+    { "kind": "folder", "path": "EyesForMe", "target-membership": [ "EyesForMe" ] },
     {
       "kind": "group",
       "name": "Products",
       "children": [
-        { "path": "<PRODUCTS>/GreatApp.app", "id": "2E1AF44E309E6F910003EAAA", "type": "wrapper.application", "index": false },
+        { "path": "<PRODUCTS>/EyesForMe.app", "id": "2E1AF44E309E6F910003EAAA", "type": "wrapper.application", "index": false },
       ],
     },
   ],
   "targets": [
     {
-      "name": "GreatApp",
+      "name": "EyesForMe",
       "id": "2E1AF44D309E6F910003EAAA",
-      "product": "Products/GreatApp.app",
+      "product": "Products/EyesForMe.app",
       "product-type": "application",
       "build-phases": [
         "compile-sources",
