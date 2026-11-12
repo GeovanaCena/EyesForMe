@@ -127,4 +127,3 @@ final class CameraManager: ObservableObject {
         }
     }
 }
-[
