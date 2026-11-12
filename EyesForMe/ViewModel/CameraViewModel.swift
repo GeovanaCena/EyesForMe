@@ -19,10 +19,15 @@ final class CameraViewModel: ObservableObject{
     @Published var intensidade: Double = 1.0
     
     // Guarda o brilho original do iPhone
-    private var brilhoOriginal: CGFloat = 0.5
+    private var brilhoOriginal: CGFloat  = 0.5
     private var tela: UIScreen?
     
-    //configurar a tela
+   
+    private let speech = SpeechManager()
+    private let confirmationSound = ConfirmationSoundManager()
+    
+    
+    ///configurar a tela
     func configurarTela (_ screen: UIScreen ){
         guard tela == nil else {return}
         
@@ -31,19 +36,43 @@ final class CameraViewModel: ObservableObject{
         screen.brightness = 1.0
     }
     
-        //inicia a camera
+        ///inicia a camera
     func iniciarCamera (){
         intensidade=1.0
         camera.iniciarCamera()
+        
+        speech.falarSeNecessario(CameraVoiceMessages.cameraAtivada)
+        //speech.falar("Câmera frontal ativada, posicione o seu rosto em frente à câmera. ")
     }
-    //restaura o brilho ao sair da camera
+    
+    ///reprodiz uma orientacao por voce
+    func falarOrientacao (_ mensagem: String){
+        //interropme som de confirmacao
+        confirmationSound.parar()
+        
+        //reproduz a mensagem sem reprtir a utlima
+        speech.falarSeNecessario(mensagem)
+        
+    }
+    
+    func reproduzirSomConfirmacao (){
+        //interrompe uma fala qe esteja em andamento
+        speech.parar()
+        //repdiuzi o som de confirmaca
+        confirmationSound.reproduzimSomConfirmacao()
+    }
+    
+    
+    ///restaura o brilho ao sair da camera, interrompe os audios
     func encerrarCamera(){
+        speech.parar()
+        confirmationSound.parar()
         camera.pararCamera()
         restaurarBrilho()
         
     }
     
-    //controla o brilho conforme o ciclo de vida
+    //controla o brilho conforme o ciclo de vida do app
     func atualizarEstado (_ fase: ScenePhase){
         switch fase{
         case .active:
@@ -60,6 +89,20 @@ final class CameraViewModel: ObservableObject{
     private func restaurarBrilho(){
         tela?.brightness = brilhoOriginal
     }
+    
+    
+    func testarFalasRepetidas() {
+        
+        speech.falarSeNecessario(CameraVoiceMessages.rostoNaoDetectado)
+        speech.falarSeNecessario(CameraVoiceMessages.rostoNaoDetectado)
+        speech.falarSeNecessario(CameraVoiceMessages.rostoParcial)
+        
+    }
+    
+    func testarSomConfirmacao (){
+        reproduzirSomConfirmacao()
+    }
+
     
     
     

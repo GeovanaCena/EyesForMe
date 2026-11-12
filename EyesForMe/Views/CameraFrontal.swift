@@ -41,6 +41,8 @@ struct CameraFrontal: View {
                         .clipShape(
                             RoundedRectangle(cornerRadius: 25)
                         )
+                        .accessibilityLabel("Visualização da câmera frontal")
+                        .accessibilityHint("A câmera frontal está sendo utilizada pelo aplicativo")
                         .overlay {
                             ZStack{
                                 // Moldura luminosa
@@ -70,12 +72,39 @@ struct CameraFrontal: View {
                                         
                                         Slider(value: $viewModel.intensidade, in: 0...1)
                                             .tint(.white)
+                                            .accessibilityLabel("Intensidade da iluminação")
+                                            .accessibilityValue("\(Int(viewModel.intensidade * 100)) por cento")
+                                            .accessibilityHint("Deslize para ajustar a intensidade da iluminação")
                                     }
                                     .padding(15)
                                     .background(Color.black.opacity(0.6))
                                     .cornerRadius(15)
                                     .padding(.horizontal, 20)
                                     .padding(.bottom, 20)
+                                    
+                                    
+                                    //so pra testar, dps apagr os dois botoes
+                                    Button {
+                                        viewModel.testarFalasRepetidas()
+                                    } label: {
+                                        Text("Apertar")
+                                            .fontWeight(.bold)
+                                            .padding()
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(10)
+                                            .accessibilityLabel("abrir a câmera")
+                                    }
+                                    
+                                    Button("Testar som de confirmação") {
+                                        viewModel.testarSomConfirmacao()
+                                    }
+                                    
+                                    Button("Testar orientação por voz") {
+                                        viewModel.falarOrientacao(
+                                            CameraVoiceMessages.rostoNaoDetectado
+                                        )
+                                    }
                                     
                                 }
                                 
@@ -91,7 +120,6 @@ struct CameraFrontal: View {
             viewModel.iniciarCamera()
         }
         .onDisappear {
-            
             // Interrompe a câmera
             viewModel.encerrarCamera()
         }

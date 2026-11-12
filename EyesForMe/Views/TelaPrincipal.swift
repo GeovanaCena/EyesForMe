@@ -26,6 +26,7 @@ struct TelaPrincipal: View {
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                        .accessibilityLabel("abrir a câmera")
                 }
                 .navigationDestination(isPresented: $abrirCamera) {
                     CameraFrontal()
