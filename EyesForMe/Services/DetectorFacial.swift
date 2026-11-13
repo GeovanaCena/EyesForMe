@@ -12,12 +12,12 @@ import ImageIO
 
 final class DetectorFacial {
     
-    var flashLigado = false // so detctar se o flah tove ligado
+    //var flashLigado = false // so detctar se o flah tove ligado
     var orientacao: CGImagePropertyOrientation = .leftMirrored // aqui avisa o vison pra qu lado a tela esta virada
 
     func detectar(_ frame: CVPixelBuffer) -> CGRect? {
 
-        guard flashLigado else { return nil }
+       // guard flashLigado else { return nil }
 
         let pedido = VNDetectFaceRectanglesRequest()
         let handler = VNImageRequestHandler(

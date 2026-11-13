@@ -11,7 +11,7 @@ import SwiftUI
 import AVFoundation
 import Combine
 
-final class CameraManager: ObservableObject {
+final class CameraManager: NSObject, ObservableObject {
 
     let session = AVCaptureSession()
 
@@ -21,6 +21,23 @@ final class CameraManager: ObservableObject {
     @Published var erro: String?
 
     private var configurada = false
+    
+    //processar os frames
+    private let videoQueue = DispatchQueue(label: "camera.video.queue")
+    
+    //recebe os frames da camera
+    private let videoOutput = AVCaptureVideoDataOutput()
+    
+    //detetcao facial
+    private let detector = DetectorFacial()
+    private let classificador = ClassificadorPosicao()
+    
+    //guarda a ultima posicao
+    private var ultimaPosicao: PosicaoRosto?
+    
+    //envia o resultado da classificacao pro viewlmodel
+    var onPosicaoAtualizada: ((PosicaoRosto) -> Void)?
+    
 
     func iniciarCamera() {
 
@@ -42,17 +59,23 @@ final class CameraManager: ObservableObject {
             }
 
         case .denied, .restricted:
-            permissaoNegada = true
+            DispatchQueue.main.async{
+                self.permissaoNegada = true
+                
+            }
+            
 
         @unknown default:
-            permissaoNegada = true
+            DispatchQueue.main.async {
+                self.permissaoNegada = true
+
+            }
         }
     }
 
     private func configurarCamera() {
 
         sessionQueue.async { [weak self] in
-
             guard let self = self else { return }
 
             guard !self.configurada else {
@@ -70,7 +93,6 @@ final class CameraManager: ObservableObject {
                 
             ) else {
                 print("Câmera frontal encontrada!")
-               
 
                 self.session.commitConfiguration()
 
@@ -91,7 +113,32 @@ final class CameraManager: ObservableObject {
                 }
 
                 self.session.addInput(entrada)
-
+                
+                //configura a saida de video.
+                self.videoOutput.videoSettings = [
+                    kCVPixelBufferPixelFormatTypeKey as String:
+                        kCVPixelFormatType_32BGRA
+                ]
+                
+                //descarta frames atrasados
+                self.videoOutput.alwaysDiscardsLateVideoFrames = true
+                
+                self.videoOutput.setSampleBufferDelegate(
+                    self,
+                    queue: self.videoQueue
+                )
+                
+                guard self.session.canAddOutput(self.videoOutput) else {
+                    self.session.commitConfiguration()
+                    
+                    DispatchQueue.main.async {
+                        self.erro = "Não foi possível configurar a saída de vídeo."
+                    }
+                    return
+                }
+                
+                self.session.addOutput(self.videoOutput)
+                        
                 self.session.commitConfiguration()
 
                 self.configurada = true
@@ -110,7 +157,6 @@ final class CameraManager: ObservableObject {
     }
 
     private func iniciarSessao() {
-
         guard !session.isRunning else { return }
         print("Iniciando sessão da câmera...")
 
@@ -124,6 +170,49 @@ final class CameraManager: ObservableObject {
             if self.session.isRunning {
                 self.session.stopRunning()
             }
+            //self.videoOutput.setSampleBufferDelegate(nil, queue: nil)
         }
+    }
+    
+    func resetarUltimaPosicao() {
+        videoQueue.async { [weak self] in
+            self?.ultimaPosicao = nil
+        }
+    }
+}
+
+///recebimento dos frames
+extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    func captureOutput(
+        _ output: AVCaptureOutput,
+        didOutput sampleBuffer: CMSampleBuffer,
+        from connection: AVCaptureConnection
+    ) {
+        //obtem o frame indivual da camera
+        guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            return
+        }
+        
+        //detecta o rosto no frame
+        let retanguloRosto = detector.detectar(frame)
+        
+        //classifica a posicao do rosto
+        let posicao = classificador.classificar(retanguloRosto)
+        
+        //evitar enviar o mesmo estado
+        guard posicao != ultimaPosicao else {
+            return
+        }
+        
+        ultimaPosicao = posicao
+        
+        //entrega o resultado
+        DispatchQueue.main.async {
+            [weak self ] in
+            self?.onPosicaoAtualizada?(posicao)
+        }
+        
+            
     }
 }

@@ -42,6 +42,8 @@
         "ENABLE_PREVIEWS": "YES",
         "GENERATE_INFOPLIST_FILE": "YES",
         "INFOPLIST_KEY_NSCameraUsageDescription": "O aplicativo precisa acessar a câmera frontal para orientar a aplicação de maquiagem.",
+        "INFOPLIST_KEY_NSMicrophoneUsageDescription": "O EyesForMe utiliza o microfone para reconhecer comandos de voz.\n",
+        "INFOPLIST_KEY_NSSpeechRecognitionUsageDescription": "O EyesForMe utiliza o reconhecimento de fala para identificar solicitações de feedback.",
         "INFOPLIST_KEY_UIApplicationSceneManifest_Generation": "YES",
         "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents": "YES",
         "INFOPLIST_KEY_UILaunchScreen_Generation": "YES",
